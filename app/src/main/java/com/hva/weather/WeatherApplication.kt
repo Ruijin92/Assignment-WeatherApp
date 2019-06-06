@@ -1,6 +1,8 @@
 package com.hva.weather
 
 import android.app.Application
+import android.content.Context
+import com.google.android.gms.location.LocationServices
 import com.hva.weather.data.db.WeatherDatabase
 import com.hva.weather.data.network.ConnectivityInterceptorImpl
 import com.hva.weather.data.network.IConnectivityInterceptor
@@ -37,9 +39,10 @@ class WeatherApplication : Application(), KodeinAware {
 
         bind<IConnectivityInterceptor>() with singleton { ConnectivityInterceptorImpl(instance()) }
         bind() from singleton { IXUWeatherApiService(instance()) }
-
         bind<IWeatherDataSource>() with singleton { WeatherDataSourceImpl(instance()) }
-        bind<ILocationProvider>() with singleton { LocationProviderImpl()}
+
+        bind() from provider {LocationServices.getFusedLocationProviderClient(instance<Context>())}
+        bind<ILocationProvider>() with singleton { LocationProviderImpl(instance(),instance())}
         bind<IWeatherRepository>() with singleton { WeatherRepositoryImpl(instance(), instance(),instance(),instance()) }
         bind<IUnitProvider>() with singleton { UnitProviderImpl(instance()) }
         bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
