@@ -1,7 +1,8 @@
 package com.hva.weather.data.network.XU
 
 import com.hva.weather.data.network.IConnectivityInterceptor
-import com.hva.weather.data.db.XU.entity.CurrentWeatherResponse
+import com.hva.weather.data.db.XU.current.CurrentWeatherResponse
+import com.hva.weather.data.db.XU.forecast.FutureWeatherResponse
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
@@ -25,6 +26,12 @@ interface IXUWeatherApiService {
     ): Deferred<CurrentWeatherResponse>
     //Deferred is part of the kotlin Coroutins -> means even thought we don't have
     //the data complete we still can give back the DataTyp
+    @GET("forecast.json")
+    fun getFutureWeather(
+        @Query("q") location: String,
+        @Query("days") days: Int,
+        @Query("lang") languageCode: String = "en"
+    ) : Deferred<FutureWeatherResponse>
 
     companion object {
         operator fun invoke(connectivityInterceptor: IConnectivityInterceptor): IXUWeatherApiService {

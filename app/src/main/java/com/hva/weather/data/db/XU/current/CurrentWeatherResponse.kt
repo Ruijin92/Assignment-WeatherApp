@@ -1,4 +1,4 @@
-package com.hva.weather.data.db.XU.entity
+package com.hva.weather.data.db.XU.current
 
 import com.google.gson.annotations.SerializedName
 import com.hva.weather.data.db.XU.apixu.entity.CurrentWeatherEntryXU

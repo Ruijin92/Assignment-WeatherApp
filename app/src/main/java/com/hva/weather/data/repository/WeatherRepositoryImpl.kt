@@ -1,12 +1,11 @@
 package com.hva.weather.data.repository
 
-import android.location.LocationProvider
 import androidx.lifecycle.LiveData
 import com.hva.weather.data.db.ICurrentWeatherDao
 import com.hva.weather.data.db.IWeatherLocationDao
 import com.hva.weather.data.db.XU.IUnitSpecificCurrentWeatherEntry
 import com.hva.weather.data.db.XU.apixu.entity.WeatherLocation
-import com.hva.weather.data.db.XU.entity.CurrentWeatherResponse
+import com.hva.weather.data.db.XU.current.CurrentWeatherResponse
 import com.hva.weather.data.network.XU.IWeatherDataSource
 import com.hva.weather.data.provider.ILocationProvider
 import kotlinx.coroutines.Dispatchers
