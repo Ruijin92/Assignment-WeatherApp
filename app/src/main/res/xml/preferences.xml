@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="Weather Location">
+        <SwitchPreference
+                android:key="USE_DEVICE_LOCATION"
+                android:title="Use device location"
+                android:summary="Allows the App to get your location"
+                android:defaultValue="true"
+                android:disableDependentsState="true">
+        </SwitchPreference>
+        <EditTextPreference
+                android:key="CUSTOM_LOCATION"
+                android:title="Location"
+                android:defaultValue="Dornbirn"
+                android:summary="The user can set his own location"
+                android:dependency="USE_DEVICE_LOCATION">
+        </EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+            android:title="Unit">
+        <ListPreference
+                android:key="UNIT_SYSTEM"
+                android:title="Unit system"
+                android:summary="%s"
+                android:defaultValue="METRIC"
+                android:entries="@array/unitSystemEntries"
+                android:entryValues="@array/unitSystemEnums">
+        </ListPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+            android:title="Weather Data API">
+        <SwitchPreference
+                android:key="XU_API"
+                android:title="APIXU"
+                android:summary="Get the weather data from APIXU"
+                android:defaultValue="true">
+        </SwitchPreference>
+        <SwitchPreference
+                android:key="O_API"
+                android:title="OAPI"
+                android:summary="Get the weather data from OAPI"
+                android:defaultValue="false">
+        </SwitchPreference>
+    </PreferenceCategory>
+</PreferenceScreen>
