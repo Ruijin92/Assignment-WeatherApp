@@ -7,6 +7,8 @@ import com.hva.weather.data.network.IConnectivityInterceptor
 import com.hva.weather.data.network.XU.IWeatherDataSource
 import com.hva.weather.data.network.XU.IXUWeatherApiService
 import com.hva.weather.data.network.XU.WeatherDataSourceImpl
+import com.hva.weather.data.provider.ILocationProvider
+import com.hva.weather.data.provider.LocationProviderImpl
 import com.hva.weather.data.provider.IUnitProvider
 import com.hva.weather.data.provider.UnitProviderImpl
 import com.hva.weather.data.repository.IWeatherRepository
@@ -31,12 +33,14 @@ class WeatherApplication : Application(), KodeinAware {
 
         bind() from singleton { WeatherDatabase(instance()) }
         bind() from singleton { instance<WeatherDatabase>().currentWeatherDao() }
+        bind() from singleton { instance<WeatherDatabase>().weatherLocationDao() }
 
         bind<IConnectivityInterceptor>() with singleton { ConnectivityInterceptorImpl(instance()) }
         bind() from singleton { IXUWeatherApiService(instance()) }
 
         bind<IWeatherDataSource>() with singleton { WeatherDataSourceImpl(instance()) }
-        bind<IWeatherRepository>() with singleton { WeatherRepositoryImpl(instance(), instance()) }
+        bind<ILocationProvider>() with singleton { LocationProviderImpl()}
+        bind<IWeatherRepository>() with singleton { WeatherRepositoryImpl(instance(), instance(),instance(),instance()) }
         bind<IUnitProvider>() with singleton { UnitProviderImpl(instance()) }
         bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
     }

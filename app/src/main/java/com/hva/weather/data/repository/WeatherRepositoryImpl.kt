@@ -1,10 +1,14 @@
 package com.hva.weather.data.repository
 
+import android.location.LocationProvider
 import androidx.lifecycle.LiveData
 import com.hva.weather.data.db.ICurrentWeatherDao
+import com.hva.weather.data.db.IWeatherLocationDao
 import com.hva.weather.data.db.XU.IUnitSpecificCurrentWeatherEntry
+import com.hva.weather.data.db.XU.apixu.entity.WeatherLocation
 import com.hva.weather.data.db.XU.entity.CurrentWeatherResponse
 import com.hva.weather.data.network.XU.IWeatherDataSource
+import com.hva.weather.data.provider.ILocationProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -16,8 +20,19 @@ import org.threeten.bp.ZonedDateTime
  */
 class WeatherRepositoryImpl(
     private val currentWeatherDao: ICurrentWeatherDao,
-    private val weatherDataSourceXU: IWeatherDataSource
+    private val weatherLocationDao: IWeatherLocationDao,
+    private val weatherDataSourceXU: IWeatherDataSource,
+    private val locationProvider: ILocationProvider
 ) : IWeatherRepository {
+
+    /**
+     * Here we get the current location which is safed in the database we need it to check if it is changed
+     */
+    override suspend fun getWeatherLocation(): LiveData<WeatherLocation> {
+        return withContext(Dispatchers.IO) {
+            return@withContext weatherLocationDao.getLocation()
+        }
+    }
 
     /**
      * Here we observe the downloadedCurrentWeather, we observer it forever so each time there is new data then
@@ -39,7 +54,7 @@ class WeatherRepositoryImpl(
         return withContext(Dispatchers.IO) {
             initWeatherData()
             //TODO: check the Settings which API should be used
-            if(true) {
+            if (true) {
                 return@withContext if (metric) currentWeatherDao.getWeatherMetric() else currentWeatherDao.getWeatherImperial()
             } else {
                 return@withContext if (metric) currentWeatherDao.getWeatherMetric() else currentWeatherDao.getWeatherImperial()
@@ -54,6 +69,7 @@ class WeatherRepositoryImpl(
     private fun persistFetchedCurrentWeather(fetchedWeather: CurrentWeatherResponse) {
         GlobalScope.launch(Dispatchers.IO) {
             currentWeatherDao.upsert(fetchedWeather.currentWeatherEntryXU)
+            weatherLocationDao.upsert(fetchedWeather.location)
             //TODO: add the other API upsert into here
         }
     }
@@ -62,16 +78,23 @@ class WeatherRepositoryImpl(
      * Checks if its needed to fetch if it does it calls the fetchcurrentweather function and gets the data
      */
     private suspend fun initWeatherData() {
-        if (isFetchedCurrentNeeded(ZonedDateTime.now().minusHours(1))){
+        val lastWeatherLocation = weatherLocationDao.getLocation().value
+
+        if (lastWeatherLocation == null || locationProvider.hasLocationChanged(lastWeatherLocation)) {
             fetchCurrentWeather()
+            return
         }
+
+        if (isFetchedCurrentNeeded(lastWeatherLocation.zonedDateTime)) {
+                fetchCurrentWeather()
+            }
     }
 
     /**
      * Makes an API call and gets the current weather
      */
     private suspend fun fetchCurrentWeather() {
-        weatherDataSourceXU.fetchCurrentWeather("Dornbirn", "en")
+        weatherDataSourceXU.fetchCurrentWeather(locationProvider.getPreferredLocationString(), "en")
         //TODO: add the other api call here
     }
 

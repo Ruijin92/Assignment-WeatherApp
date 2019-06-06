@@ -39,11 +39,17 @@ class CurrentWeatherFragment : ScopedFragment(), KodeinAware {
      */
     private fun bindData() = launch {
         val currentWeather = viewModel.weather.await()
+        val weatherLocation = viewModel.weatherLocation.await()
+
+        weatherLocation.observe(this@CurrentWeatherFragment, Observer{
+            if(it == null) return@Observer
+            setLoaction(it.name + ", " + it.country)
+        })
         currentWeather.observe(this@CurrentWeatherFragment, Observer {
             if (it == null) return@Observer
             progressBar_loading.visibility = View.GONE
 
-            setLoaction("Dornbirn, Vorarlberg")
+
             setTempAndFeelLike(it.temperature,it.feelsLikeTemperature)
             setCondition(it.conditionText)
             setPrecipitation(it.precipitationVolume)
