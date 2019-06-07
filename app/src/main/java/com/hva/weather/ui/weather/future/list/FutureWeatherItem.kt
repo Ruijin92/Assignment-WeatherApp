@@ -15,6 +15,8 @@ class FutureWeatherItem(val weatherEntry: IUnitSpecificFutureWeatherEntry) : Ite
     override fun bind(viewHolder: ViewHolder, position: Int) {
         viewHolder.apply {
             textView_condition.text = weatherEntry.condition
+            updateDate()
+            updateTemperature()
         }
     }
 

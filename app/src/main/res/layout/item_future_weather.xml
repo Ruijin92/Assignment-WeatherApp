@@ -5,7 +5,7 @@
                                                    android:layout_width="match_parent"
                                                    android:layout_height="wrap_content"
                                                    android:minHeight="?listPreferredItemHeightLarge"
-                                                   android:layout_margin="5dp"
+                                                   android:layout_margin="2dp"
                                                    app:cardBackgroundColor="@android:color/white"
                                                    android:backgroundTint="@android:color/white">
 
@@ -46,7 +46,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                tools:text="25.0°C"/>
+                tools:text="25.0°C" android:textColor="@android:color/holo_red_dark" android:textSize="30sp"/>
 
         <TextView
                 android:id="@+id/textView_condition"
@@ -64,7 +64,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0"
-                tools:text="Clear"/>
+                tools:text="Clear" android:textSize="18sp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

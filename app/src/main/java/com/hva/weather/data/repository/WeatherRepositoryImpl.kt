@@ -149,7 +149,7 @@ class WeatherRepositoryImpl(
             deleteOldForecastData()
             val futureWeatherList = fetchedWeather.futureWeather.entries
             futureWeatherDao.insert(futureWeatherList)
-            weatherLocationDao.upsert(fetchedWeather.weatherLocation)
+            //weatherLocationDao.upsert(fetchedWeather.weatherLocation)
         }
     }
     private suspend fun fetchFutureWeather() {
