@@ -2,27 +2,42 @@ package com.hva.weather.data.repository
 
 import androidx.lifecycle.LiveData
 import com.hva.weather.data.db.ICurrentWeatherDao
+import com.hva.weather.data.db.IFutureWeatherDao
 import com.hva.weather.data.db.IWeatherLocationDao
 import com.hva.weather.data.db.XU.IUnitSpecificCurrentWeatherEntry
 import com.hva.weather.data.db.XU.apixu.entity.WeatherLocation
 import com.hva.weather.data.db.XU.current.CurrentWeatherResponse
+import com.hva.weather.data.db.XU.forecast.FutureWeatherResponse
+import com.hva.weather.data.db.forecast.IUnitSpecificFutureWeatherEntry
+import com.hva.weather.data.network.XU.FORECAST_DAYS
 import com.hva.weather.data.network.XU.IWeatherDataSource
 import com.hva.weather.data.provider.ILocationProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
+import java.util.*
 
 /**
  * Handel's all the persisting and storing of the data
  */
 class WeatherRepositoryImpl(
     private val currentWeatherDao: ICurrentWeatherDao,
+    private val futureWeatherDao: IFutureWeatherDao,
     private val weatherLocationDao: IWeatherLocationDao,
     private val weatherDataSourceXU: IWeatherDataSource,
     private val locationProvider: ILocationProvider
 ) : IWeatherRepository {
+
+
+    override suspend fun getFutureWeatherByDate(
+        date: LocalDate,
+        metric: Boolean
+    ): LiveData<out IUnitSpecificFutureWeatherEntry> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     /**
      * Here we get the current location which is safed in the database we need it to check if it is changed
@@ -39,9 +54,14 @@ class WeatherRepositoryImpl(
      * would not hurt any lifecycle or UI-thread of the application
      */
     init {
-        //TODO: Add the other API: downloadedCurrentWeather here
-        weatherDataSourceXU.downloadedCurrentWeather.observeForever {
-            persistFetchedCurrentWeather(it)
+        weatherDataSourceXU.apply {
+            //TODO: Add the other API: downloadedCurrentWeather here
+            downloadedCurrentWeather.observeForever {
+                persistFetchedCurrentWeather(it)
+            }
+            downloadedFutureWeather.observeForever {
+                persistFetchedFutureWeather(it)
+            }
         }
     }
 
@@ -77,16 +97,20 @@ class WeatherRepositoryImpl(
      * Checks if its needed to fetch if it does it calls the fetchcurrentweather function and gets the data
      */
     private suspend fun initWeatherData() {
-        val lastWeatherLocation = weatherLocationDao.getLocation().value
+        val lastWeatherLocation = weatherLocationDao.getLocationNonLive()
 
         if (lastWeatherLocation == null || locationProvider.hasLocationChanged(lastWeatherLocation)) {
             fetchCurrentWeather()
+            fetchFutureWeather()
             return
         }
 
         if (isFetchedCurrentNeeded(lastWeatherLocation.zonedDateTime)) {
                 fetchCurrentWeather()
             }
+        if(isFetchFutureNeeded()){
+            fetchFutureWeather()
+        }
     }
 
     /**
@@ -104,4 +128,52 @@ class WeatherRepositoryImpl(
         val thirtyMinutesAgo = ZonedDateTime.now().minusMinutes(30)
         return lastTimeFetched.isBefore(thirtyMinutesAgo)
     }
+
+    override suspend fun getFutureWeatherList(startDate: LocalDate, metric: Boolean):
+            LiveData<out List<IUnitSpecificFutureWeatherEntry>> {
+        return withContext(Dispatchers.IO) {
+            initWeatherData()
+            return@withContext if (metric) futureWeatherDao.getFutureWeatherMetric(startDate)
+            else futureWeatherDao.getFutureWeatherImperial(startDate)
+        }
+    }
+
+    private fun persistFetchedFutureWeather(fetchedWeather: FutureWeatherResponse) {
+
+        fun deleteOldForecastData() {
+            val today = LocalDate.now()
+            futureWeatherDao.deleteOldEntries(today)
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            deleteOldForecastData()
+            val futureWeatherList = fetchedWeather.futureWeather.entries
+            futureWeatherDao.insert(futureWeatherList)
+            weatherLocationDao.upsert(fetchedWeather.weatherLocation)
+        }
+    }
+    private suspend fun fetchFutureWeather() {
+        weatherDataSourceXU.fetchFutureWeather(
+            locationProvider.getPreferredLocationString(),
+            "en"
+        )
+    }
+    private fun isFetchFutureNeeded(): Boolean {
+        val today = LocalDate.now()
+        val futureWeatherCount = futureWeatherDao.countFutureWeather(today)
+        return futureWeatherCount < FORECAST_DAYS
+    }
+
+    /*
+    override suspend fun getFutureWeatherByDate(
+        date: LocalDate,
+        metric: Boolean
+    ): LiveData<out IUnitSpecificFutureWeatherEntry> {
+        return withContext(Dispatchers.IO) {
+            initWeatherData()
+            return@withContext if (metric) futureWeatherDao.getDetailedWeatherByDateMetric(date)
+            else futureWeatherDao.getDetailedWeatherByDateImperial(date)
+        }
+    }
+    */
 }

@@ -8,13 +8,15 @@ import androidx.room.TypeConverters
 import com.hva.weather.data.db.OAPI.entity.CurrentWeatherResponse
 import com.hva.weather.data.db.XU.apixu.entity.CurrentWeatherEntryXU
 import com.hva.weather.data.db.XU.apixu.entity.WeatherLocation
+import com.hva.weather.data.db.XU.forecast.FutureWeatherEntire
 import com.hva.weather.internal.Converters
 
-@Database(entities = arrayOf(CurrentWeatherEntryXU::class, CurrentWeatherResponse::class, WeatherLocation::class), version = 1)
+@Database(entities = arrayOf(CurrentWeatherEntryXU::class, CurrentWeatherResponse::class, WeatherLocation::class, FutureWeatherEntire::class), version = 1)
 @TypeConverters(Converters::class)
 abstract class WeatherDatabase : RoomDatabase() {
     abstract fun currentWeatherDao(): ICurrentWeatherDao
     abstract fun weatherLocationDao(): IWeatherLocationDao
+    abstract fun futureWeatherDao(): IFutureWeatherDao
 
     companion object {
         @Volatile

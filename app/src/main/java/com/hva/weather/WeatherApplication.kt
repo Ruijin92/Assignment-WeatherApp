@@ -16,6 +16,7 @@ import com.hva.weather.data.provider.UnitProviderImpl
 import com.hva.weather.data.repository.IWeatherRepository
 import com.hva.weather.data.repository.WeatherRepositoryImpl
 import com.hva.weather.ui.weather.current.CurrentWeatherViewModelFactory
+import com.hva.weather.ui.weather.future.list.FutureListWeatherViewModelFactory
 import com.jakewharton.threetenabp.AndroidThreeTen
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -36,6 +37,7 @@ class WeatherApplication : Application(), KodeinAware {
         bind() from singleton { WeatherDatabase(instance()) }
         bind() from singleton { instance<WeatherDatabase>().currentWeatherDao() }
         bind() from singleton { instance<WeatherDatabase>().weatherLocationDao() }
+        bind() from singleton { instance<WeatherDatabase>().futureWeatherDao() }
 
         bind<IConnectivityInterceptor>() with singleton { ConnectivityInterceptorImpl(instance()) }
         bind() from singleton { IXUWeatherApiService(instance()) }
@@ -43,9 +45,10 @@ class WeatherApplication : Application(), KodeinAware {
 
         bind() from provider {LocationServices.getFusedLocationProviderClient(instance<Context>())}
         bind<ILocationProvider>() with singleton { LocationProviderImpl(instance(),instance())}
-        bind<IWeatherRepository>() with singleton { WeatherRepositoryImpl(instance(), instance(),instance(),instance()) }
+        bind<IWeatherRepository>() with singleton { WeatherRepositoryImpl(instance(), instance(),instance(),instance(),instance()) }
         bind<IUnitProvider>() with singleton { UnitProviderImpl(instance()) }
         bind() from provider { CurrentWeatherViewModelFactory(instance(), instance()) }
+        bind() from provider { FutureListWeatherViewModelFactory(instance(), instance()) }
     }
 
     /**

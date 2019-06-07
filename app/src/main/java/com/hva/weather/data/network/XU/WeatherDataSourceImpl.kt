@@ -7,7 +7,7 @@ import com.hva.weather.data.db.XU.current.CurrentWeatherResponse
 import com.hva.weather.data.db.XU.forecast.FutureWeatherResponse
 import com.hva.weather.internal.NoConnectivityException
 
-private const val FORECAST_DAYS = 7
+const val FORECAST_DAYS = 7
 class WeatherDataSourceImpl(private val apiService: IXUWeatherApiService) : IWeatherDataSource {
 
 

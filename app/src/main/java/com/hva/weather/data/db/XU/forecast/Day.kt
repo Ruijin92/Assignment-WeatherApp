@@ -3,7 +3,8 @@ package com.hva.weather.data.db.XU.forecast
 
 import androidx.room.Embedded
 import com.google.gson.annotations.SerializedName
-import java.util.concurrent.locks.Condition
+import com.hva.weather.data.db.XU.apixu.entity.Condition
+
 
 data class Day(
     val avghumidity: Double,
